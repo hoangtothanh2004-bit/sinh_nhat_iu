@@ -466,7 +466,7 @@ class Cake3D {
     const sinX = Math.sin(this.rotX);
 
     const centerX = this.width / 2;
-    const centerY = this.height * 0.58;
+    const centerY = this.height * 0.62;
 
     // 2. Project Cake Particles & Sort by Depth Z
     const projected = [];
