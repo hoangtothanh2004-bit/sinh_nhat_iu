@@ -1,174 +1,98 @@
 /**
  * Birthday Application Logic for Ngọc Bích (14/09)
- * Full interaction flow, audio sync, chibi animation, fireworks and 3D cake
+ * Full interaction flow: 3D Particle Cake, Side Wings HUD, Audio, Lyrics, Modals
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Elements
+  // 1. Canvas & 3D Cake Engine Initialization
   const canvas = document.getElementById('cakeCanvas');
-  const introStage = document.getElementById('intro-stage');
-  const chibiChar = document.getElementById('chibi-character');
-  const chibiAvatar = document.getElementById('chibi-avatar');
-  const speechBubble = document.getElementById('speech-bubble');
+  const cakeEngine = new Cake3D(canvas);
+  cakeEngine.showCake = true; // Bánh sinh nhật luôn luôn hiển thị 100%
+  cakeEngine.start();
+
+  // 2. DOM Elements
   const openLetterCta = document.getElementById('open-letter-cta');
-  const skipToCakeBtn = document.getElementById('skip-to-cake-btn');
   const letterModal = document.getElementById('letter-modal');
   const closeLetterBtn = document.getElementById('close-letter-btn');
   const makeWishBtn = document.getElementById('make-wish-btn');
-  const cakeUiLayer = document.getElementById('cake-ui-layer');
+  
   const giftModal = document.getElementById('gift-modal');
   const openGiftBtn = document.getElementById('open-gift-btn');
   const closeGiftBtn = document.getElementById('close-gift-btn');
-  const reopenLetterBtn = document.getElementById('reopen-letter-btn');
+
   const blowCandleBtn = document.getElementById('blow-candle-btn');
   const fireworkBtn = document.getElementById('firework-btn');
+
   const audioToggleBtn = document.getElementById('audio-toggle-btn');
   const audioBtnLabel = document.getElementById('audio-btn-label');
-  const cornerChibi = document.getElementById('corner-chibi');
   const bgAudio = document.getElementById('bgAudio');
   const lyricText = document.getElementById('lyric-text');
-  const stardustField = document.getElementById('stardust-field');
   const themeButtons = document.querySelectorAll('.hud-btn[data-theme]');
 
-  // Initialize 3D Particle Cake Engine
-  const cakeEngine = new Cake3D(canvas);
-  cakeEngine.start();
-
-  let hasStartedCakeMode = false;
   let isCandleBlown = false;
 
   // =========================================================================
-  // 1. CHIBI RUNNING & INTRO ANIMATION TIMELINE
-  // =========================================================================
-
-  // Generate trailing stardust particles behind chibi while running
-  let stardustInterval = setInterval(() => {
-    if (!chibiChar || !introStage.contains(chibiChar)) {
-      clearInterval(stardustInterval);
-      return;
-    }
-    const rect = chibiChar.getBoundingClientRect();
-    if (rect.right > 0 && rect.left < window.innerWidth) {
-      createStardust(rect.left + rect.width / 2, rect.bottom - 20);
-    }
-  }, 100);
-
-  function createStardust(x, y) {
-    const p = document.createElement('div');
-    p.className = 'stardust-particle';
-    p.style.left = `${x + (Math.random() - 0.5) * 40}px`;
-    p.style.top = `${y + (Math.random() - 0.5) * 20}px`;
-    stardustField.appendChild(p);
-    setTimeout(() => p.remove(), 1200);
-  }
-
-  // When Chibi finishes running to center (~3.8s)
-  setTimeout(() => {
-    chibiChar.classList.remove('chibi-running');
-    chibiChar.classList.add('chibi-idle');
-    clearInterval(stardustInterval);
-
-    // Show speech bubble with cheerful greeting
-    setTimeout(() => {
-      speechBubble.classList.add('show');
-    }, 300);
-
-    // Show Open Letter CTA button & Skip link
-    setTimeout(() => {
-      openLetterCta.classList.add('show');
-      skipToCakeBtn.classList.add('show');
-    }, 700);
-  }, 3800);
-
-  // Click on Chibi or Button to open secret letter
-  openLetterCta.addEventListener('click', openSecretLetter);
-  chibiAvatar.addEventListener('click', openSecretLetter);
-
-  // Skip straight to Cake
-  skipToCakeBtn.addEventListener('click', () => {
-    enterCakeSceneDirectly();
-  });
-
-  // =========================================================================
-  // 2. OPENING SECRET LETTER (THIỆP CHÚC MỪNG 14/09)
+  // 3. LETTER MODAL (BỨC THƯ CHÚC MỪNG 14/09)
   // =========================================================================
   function openSecretLetter() {
-    // Attempt to start sweet birthday music
     playMusic();
-
-    // Spawn celebratory sparkles
-    for (let i = 0; i < 6; i++) {
-      setTimeout(() => {
-        cakeEngine.createFirework(
-          window.innerWidth / 2 + (Math.random() - 0.5) * 250,
-          window.innerHeight / 2 + (Math.random() - 0.5) * 250
-        );
-      }, i * 140);
+    if (letterModal) {
+      letterModal.classList.add('active');
     }
-
-    letterModal.classList.add('active');
-  }
-
-  function closeLetterModal() {
-    letterModal.classList.remove('active');
-  }
-
-  closeLetterBtn.addEventListener('click', closeLetterModal);
-
-  // =========================================================================
-  // 3. TRANSITION TO 3D PARTICLE CAKE & FULL CELEBRATION
-  // =========================================================================
-  function enterCakeSceneDirectly() {
-    closeLetterModal();
-    playMusic();
-
-    if (!hasStartedCakeMode) {
-      hasStartedCakeMode = true;
-
-      // Dissolve intro stage
-      introStage.classList.add('fade-out');
-
-      // Show corner chibi buddy
-      setTimeout(() => {
-        cornerChibi.classList.add('show');
-      }, 800);
-
-      // Reveal Main 3D Cake HUD & Side Wings
-      cakeUiLayer.classList.add('active');
-
-      // Reveal 3D Cake & Fireworks Fanfare
-      cakeEngine.revealCake();
-
-      // Start Lyric Rotation
-      startLyrics();
+    // Celebratory fireworks on opening letter
+    for (let i = 0; i < 4; i++) {
+      setTimeout(() => cakeEngine.launchAutoFireworks(), i * 200);
     }
   }
 
-  makeWishBtn.addEventListener('click', enterCakeSceneDirectly);
+  function closeSecretLetter() {
+    if (letterModal) {
+      letterModal.classList.remove('active');
+    }
+  }
 
-  // Corner Chibi reopens the letter
-  cornerChibi.addEventListener('click', () => {
-    openSecretLetter();
-  });
-
-  reopenLetterBtn.addEventListener('click', () => {
-    openSecretLetter();
-  });
+  if (openLetterCta) {
+    openLetterCta.addEventListener('click', openSecretLetter);
+  }
+  if (closeLetterBtn) {
+    closeLetterBtn.addEventListener('click', closeSecretLetter);
+  }
+  if (makeWishBtn) {
+    makeWishBtn.addEventListener('click', () => {
+      closeSecretLetter();
+      for (let i = 0; i < 5; i++) {
+        setTimeout(() => cakeEngine.launchAutoFireworks(), i * 220);
+      }
+    });
+  }
 
   // =========================================================================
-  // 4. GIFT MODAL ("🎁 MỞ QUÀ" NHƯ VIDEO MẪU)
+  // 4. GIFT MODAL (HỘP QUÀ KỶ NIỆM POLAROID)
   // =========================================================================
-  openGiftBtn.addEventListener('click', () => {
-    giftModal.classList.add('active');
+  function openGift() {
+    playMusic();
+    if (giftModal) {
+      giftModal.classList.add('active');
+    }
     cakeEngine.launchAutoFireworks();
-  });
+  }
 
-  closeGiftBtn.addEventListener('click', () => {
-    giftModal.classList.remove('active');
-  });
+  function closeGift() {
+    if (giftModal) {
+      giftModal.classList.remove('active');
+    }
+  }
 
-  // Modern Light-Dismiss for Modals: click backdrop or press ESC
+  if (openGiftBtn) {
+    openGiftBtn.addEventListener('click', openGift);
+  }
+  if (closeGiftBtn) {
+    closeGiftBtn.addEventListener('click', closeGift);
+  }
+
+  // Modern Light-Dismiss: click backdrop or press ESC
   [letterModal, giftModal].forEach((modal) => {
+    if (!modal) return;
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
         modal.classList.remove('active');
@@ -178,55 +102,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-      letterModal.classList.remove('active');
-      giftModal.classList.remove('active');
+      closeSecretLetter();
+      closeGift();
     }
   });
 
   // =========================================================================
-  // 5. INTERACTIVE BUTTONS: BLOW CANDLE & FIREWORKS
+  // 5. INTERACTIVE BUTTONS: THỔI NẾN & BẮN PHÁO HOA
   // =========================================================================
-  blowCandleBtn.addEventListener('click', () => {
-    if (isCandleBlown) return;
-    isCandleBlown = true;
+  if (blowCandleBtn) {
+    blowCandleBtn.addEventListener('click', () => {
+      if (isCandleBlown) return;
+      isCandleBlown = true;
 
-    // Extinguish candle flame particles temporarily
-    cakeEngine.flameParticles = [];
-
-    // Show celebratory notification in lyrics bar
-    updateLyricDirectly("✨ Đã ước một điều ước! Nguyện mọi mong ước của Ngọc Bích đều thành hiện thực! ✨");
-
-    // Blow smoke / sparkles
-    for (let i = 0; i < 25; i++) {
-      cakeEngine.sparkles.push({
-        x: window.innerWidth / 2,
-        y: window.innerHeight * 0.58 - 50,
-        alpha: 1
-      });
-    }
-
-    blowCandleBtn.textContent = "🕯️ Nến đang ước nguyện...";
-
-    // Reignite candle magically after 4 seconds
-    setTimeout(() => {
+      // Dập tắt ngọn nến tạm thời
       cakeEngine.flameParticles = [];
-      for (let i = 0; i < 60; i++) {
-        cakeEngine.flameParticles.push(cakeEngine.createFlameParticle());
-      }
-      isCandleBlown = false;
-      blowCandleBtn.textContent = "💨 Thổi nến ước nguyện";
-      cakeEngine.launchAutoFireworks();
-    }, 4200);
-  });
 
-  fireworkBtn.addEventListener('click', () => {
-    for (let i = 0; i < 5; i++) {
-      setTimeout(() => cakeEngine.launchAutoFireworks(), i * 200);
-    }
-  });
+      // Hiển thị thông điệp ước nguyện ở thanh chữ chạy
+      updateLyricDirectly("✨ Đã ước một điều ước! Nguyện mọi mong ước của Ngọc Bích đều thành hiện thực! ✨");
+
+      // Bắn tia khói lung linh
+      for (let i = 0; i < 30; i++) {
+        cakeEngine.sparkles.push({
+          x: window.innerWidth / 2,
+          y: window.innerHeight * 0.54 - 60,
+          alpha: 1
+        });
+      }
+
+      blowCandleBtn.textContent = "🕯️ Nến đang ước nguyện...";
+
+      // Thắp sáng lại ngọn nến kỳ diệu sau 4 giây
+      setTimeout(() => {
+        cakeEngine.flameParticles = [];
+        for (let i = 0; i < 60; i++) {
+          cakeEngine.flameParticles.push(cakeEngine.createFlameParticle());
+        }
+        isCandleBlown = false;
+        blowCandleBtn.textContent = "💨 Thổi nến ước nguyện";
+        cakeEngine.launchAutoFireworks();
+      }, 4200);
+    });
+  }
+
+  if (fireworkBtn) {
+    fireworkBtn.addEventListener('click', () => {
+      for (let i = 0; i < 6; i++) {
+        setTimeout(() => cakeEngine.launchAutoFireworks(), i * 180);
+      }
+    });
+  }
 
   // =========================================================================
-  // 6. COLOR THEME SWITCHERS
+  // 6. COLOR THEME SWITCHERS (HỒNG NGỌT, NGỌC BÍCH, HOÀNG KIM, TÍM VŨ TRỤ)
   // =========================================================================
   themeButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -235,25 +163,26 @@ document.addEventListener('DOMContentLoaded', () => {
       const themeKey = btn.getAttribute('data-theme');
       cakeEngine.setTheme(themeKey);
 
-      // Firework with new theme color
+      // Pháo hoa chào mừng đổi màu
       cakeEngine.launchAutoFireworks();
     });
   });
 
   // =========================================================================
-  // 7. BACKGROUND MUSIC PLAYBACK & SYNC
+  // 7. BACKGROUND MUSIC & USER INTERACTION TRIGGER
   // =========================================================================
   function playMusic() {
-    if (bgAudio.paused) {
+    if (bgAudio && bgAudio.paused) {
       bgAudio.play().then(() => {
         audioFloatingActive(true);
       }).catch((err) => {
-        console.log('Audio autoplay prevented, will start on next interaction:', err);
+        console.log('Audio autoplay prevented, will wait for user touch:', err);
       });
     }
   }
 
   function audioFloatingActive(isPlaying) {
+    if (!audioToggleBtn || !audioBtnLabel) return;
     if (isPlaying) {
       audioToggleBtn.classList.remove('paused');
       audioBtnLabel.textContent = 'Nhạc: Đang phát';
@@ -263,15 +192,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  audioToggleBtn.addEventListener('click', () => {
-    if (bgAudio.paused) {
-      bgAudio.play();
-      audioFloatingActive(true);
-    } else {
-      bgAudio.pause();
-      audioFloatingActive(false);
-    }
-  });
+  if (audioToggleBtn && bgAudio) {
+    audioToggleBtn.addEventListener('click', () => {
+      if (bgAudio.paused) {
+        bgAudio.play();
+        audioFloatingActive(true);
+      } else {
+        bgAudio.pause();
+        audioFloatingActive(false);
+      }
+    });
+  }
+
+  // Autoplay music on any first user click/tap anywhere on the screen
+  const startAudioOnFirstTouch = () => {
+    playMusic();
+    window.removeEventListener('click', startAudioOnFirstTouch);
+    window.removeEventListener('touchstart', startAudioOnFirstTouch);
+  };
+  window.addEventListener('click', startAudioOnFirstTouch, { once: true });
+  window.addEventListener('touchstart', startAudioOnFirstTouch, { once: true });
 
   // =========================================================================
   // 8. HANDWRITTEN LYRICS ROTATION (GIỐNG VIDEO MẪU)
@@ -292,6 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lyricInterval = null;
 
   function updateLyricDirectly(text) {
+    if (!lyricText) return;
     lyricText.style.animation = 'none';
     void lyricText.offsetWidth; // Trigger reflow
     lyricText.textContent = text;
@@ -308,4 +249,11 @@ document.addEventListener('DOMContentLoaded', () => {
     updateLyricDirectly(lyricsList[0]);
     lyricInterval = setInterval(nextLyric, 4200);
   }
+
+  // Start lyrics right away
+  startLyrics();
+
+  // Initial celebratory fireworks
+  setTimeout(() => cakeEngine.launchAutoFireworks(), 500);
+  setTimeout(() => cakeEngine.launchAutoFireworks(), 1200);
 });

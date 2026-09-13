@@ -65,7 +65,7 @@ class Cake3D {
 
     this.currentThemeKey = 'rose'; // Default to Rose Pink theme as in sample video!
     this.theme = this.themes[this.currentThemeKey];
-    this.showCake = false; // Initially false so cake doesn't clash with intro chibi!
+    this.showCake = true; // Bánh sinh nhật luôn luôn hiển thị 100%!
 
     this.initEvents();
     this.buildCakeModel();
@@ -467,7 +467,7 @@ class Cake3D {
     const sinX = Math.sin(this.rotX);
 
     const centerX = this.width / 2;
-    const centerY = this.height * 0.62;
+    const centerY = this.height * 0.54;
 
     // 2. Project Cake Particles & Sort by Depth Z (Only if showCake is active)
     if (this.showCake) {
