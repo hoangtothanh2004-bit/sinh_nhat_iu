@@ -81,10 +81,10 @@ class Cake3D {
   }
 
   resize() {
-    this.width = this.canvas.width = window.innerWidth;
-    this.height = this.canvas.height = window.innerHeight;
-    this.scale = Math.min(this.width, this.height) / 750;
-    if (this.scale < 0.65) this.scale = 0.65;
+    this.width = this.canvas.width = window.innerWidth || document.documentElement.clientWidth || 1920;
+    this.height = this.canvas.height = window.innerHeight || document.documentElement.clientHeight || 1080;
+    this.scale = Math.min(this.width, this.height) / 720;
+    if (this.scale < 0.85) this.scale = 0.85;
   }
 
   initEvents() {
@@ -469,100 +469,98 @@ class Cake3D {
     const centerX = this.width / 2;
     const centerY = this.height * 0.54;
 
-    // 2. Project Cake Particles & Sort by Depth Z (Only if showCake is active)
-    if (this.showCake) {
-      const projected = [];
-      const scaleFactor = this.scale;
+    // 2. Project Cake Particles & Sort by Depth Z (Luôn hiển thị 100% không bao giờ ẩn)
+    const projected = [];
+    const scaleFactor = this.scale;
 
-      // Helper for 3D rotation & projection
-      const project = (x, y, z) => {
-        // Rotate around Y axis
-        const x1 = x * cosY - z * sinY;
-        const z1 = z * cosY + x * sinY;
+    // Helper for 3D rotation & projection
+    const project = (x, y, z) => {
+      // Rotate around Y axis
+      const x1 = x * cosY - z * sinY;
+      const z1 = z * cosY + x * sinY;
 
-        // Rotate around X axis
-        const y2 = y * cosX - z1 * sinX;
-        const z2 = z1 * cosX + y * sinX;
+      // Rotate around X axis
+      const y2 = y * cosX - z1 * sinX;
+      const z2 = z1 * cosX + y * sinX;
 
-        // Perspective projection
-        const distance = this.fov + z2;
-        if (distance <= 10) return null;
-        const pScale = (this.fov / distance) * scaleFactor;
-        const projX = centerX + x1 * pScale;
-        const projY = centerY + y2 * pScale;
+      // Perspective projection
+      const distance = this.fov + z2;
+      if (distance <= 10) return null;
+      const pScale = (this.fov / distance) * scaleFactor;
+      const projX = centerX + x1 * pScale;
+      const projY = centerY + y2 * pScale;
 
-        return { x: projX, y: projY, z: z2, pScale: pScale };
-      };
+      return { x: projX, y: projY, z: z2, pScale: pScale };
+    };
 
-      // Cake solid particles
-      const time = performance.now() * 0.003;
-      for (let p of this.particles) {
-        const pr = project(p.x0, p.y0, p.z0);
-        if (!pr) continue;
-        const pulseSize = p.baseSize + Math.sin(time + p.pulse) * 0.5;
-        projected.push({
-          x: pr.x,
-          y: pr.y,
-          z: pr.z,
-          radius: Math.max(0.8, pulseSize * pr.pScale),
-          color: p.color,
-          alpha: Math.min(1, 0.4 + (pr.z + 300) / 500)
-        });
-      }
-
-      // Ambient Swirl Particles
-      for (let s of this.ambientSwirl) {
-        const sx = Math.cos(s.angle) * s.radius;
-        const sz = Math.sin(s.angle) * s.radius;
-        const pr = project(sx, s.y, sz);
-        if (!pr) continue;
-        projected.push({
-          x: pr.x,
-          y: pr.y,
-          z: pr.z,
-          radius: Math.max(0.6, s.size * pr.pScale),
-          color: s.color,
-          alpha: Math.min(1, s.alpha * pr.pScale * 1.2)
-        });
-      }
-
-      // Flame Particles
-      for (let fp of this.flameParticles) {
-        const pr = project(fp.x, fp.y, fp.z);
-        if (!pr) continue;
-        projected.push({
-          x: pr.x,
-          y: pr.y,
-          z: pr.z,
-          radius: Math.max(1.2, fp.size * pr.pScale),
-          color: fp.color,
-          alpha: Math.min(1, (fp.life / fp.maxLife) * 1.2),
-          isFlame: true
-        });
-      }
-
-      // Sort back-to-front
-      projected.sort((a, b) => a.z - b.z);
-
-      // Render 3D Projected Particles
-      ctx.save();
-      for (let p of projected) {
-        ctx.globalAlpha = p.alpha;
-        ctx.fillStyle = p.color;
-
-        if (p.isFlame) {
-          ctx.shadowColor = p.color;
-          ctx.shadowBlur = 12;
-        } else {
-          ctx.shadowBlur = 0;
-        }
-
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
+    // Cake solid particles
+    const time = performance.now() * 0.003;
+    for (let p of this.particles) {
+      const pr = project(p.x0, p.y0, p.z0);
+      if (!pr) continue;
+      const pulseSize = p.baseSize + Math.sin(time + p.pulse) * 0.4;
+      projected.push({
+        x: pr.x,
+        y: pr.y,
+        z: pr.z,
+        radius: Math.max(1.8, pulseSize * pr.pScale * 1.35),
+        color: p.color,
+        alpha: Math.min(1, Math.max(0.75, 0.75 + (pr.z + 250) / 600))
+      });
     }
+
+    // Ambient Swirl Particles
+    for (let s of this.ambientSwirl) {
+      const sx = Math.cos(s.angle) * s.radius;
+      const sz = Math.sin(s.angle) * s.radius;
+      const pr = project(sx, s.y, sz);
+      if (!pr) continue;
+      projected.push({
+        x: pr.x,
+        y: pr.y,
+        z: pr.z,
+        radius: Math.max(1.2, s.size * pr.pScale * 1.2),
+        color: s.color,
+        alpha: Math.min(1, s.alpha * pr.pScale * 1.3)
+      });
+    }
+
+    // Flame Particles
+    for (let fp of this.flameParticles) {
+      const pr = project(fp.x, fp.y, fp.z);
+      if (!pr) continue;
+      projected.push({
+        x: pr.x,
+        y: pr.y,
+        z: pr.z,
+        radius: Math.max(3.0, fp.size * pr.pScale * 1.4),
+        color: fp.color,
+        alpha: Math.min(1, (fp.life / fp.maxLife) * 1.5),
+        isFlame: true
+      });
+    }
+
+    // Sort back-to-front
+    projected.sort((a, b) => a.z - b.z);
+
+    // Render 3D Projected Particles
+    ctx.save();
+    for (let p of projected) {
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+
+      if (p.isFlame) {
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 16;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
 
     // 3. Render Fireworks Over Canvas
     ctx.save();
