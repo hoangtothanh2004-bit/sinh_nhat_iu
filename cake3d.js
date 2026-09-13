@@ -83,8 +83,16 @@ class Cake3D {
   resize() {
     this.width = this.canvas.width = window.innerWidth || document.documentElement.clientWidth || 1920;
     this.height = this.canvas.height = window.innerHeight || document.documentElement.clientHeight || 1080;
-    this.scale = Math.min(this.width, this.height) / 720;
-    if (this.scale < 0.85) this.scale = 0.85;
+
+    const isMobile = this.width <= 768;
+    if (isMobile) {
+      this.scale = Math.min(this.width, this.height) / 530;
+      if (this.scale < 0.70) this.scale = 0.70;
+      if (this.scale > 0.90) this.scale = 0.90;
+    } else {
+      this.scale = Math.min(this.width, this.height) / 720;
+      if (this.scale < 0.85) this.scale = 0.85;
+    }
   }
 
   initEvents() {
@@ -466,8 +474,9 @@ class Cake3D {
     const cosX = Math.cos(this.rotX);
     const sinX = Math.sin(this.rotX);
 
+    const isMobile = this.width <= 768;
     const centerX = this.width / 2;
-    const centerY = this.height * 0.54;
+    const centerY = isMobile ? this.height * 0.35 : this.height * 0.54;
 
     // 2. Project Cake Particles & Sort by Depth Z (Luôn hiển thị 100% không bao giờ ẩn)
     const projected = [];

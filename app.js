@@ -51,9 +51,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (openLetterCta) {
-    openLetterCta.addEventListener('click', openSecretLetter);
-  }
+  // Open letter buttons (desktop + mobile)
+  document.querySelectorAll('.action-open-letter').forEach((btn) => {
+    btn.addEventListener('click', openSecretLetter);
+  });
+
   if (closeLetterBtn) {
     closeLetterBtn.addEventListener('click', closeSecretLetter);
   }
@@ -83,9 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  if (openGiftBtn) {
-    openGiftBtn.addEventListener('click', openGift);
-  }
+  // Open gift buttons (desktop + mobile)
+  document.querySelectorAll('.action-open-gift').forEach((btn) => {
+    btn.addEventListener('click', openGift);
+  });
+
   if (closeGiftBtn) {
     closeGiftBtn.addEventListener('click', closeGift);
   }
@@ -110,8 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // =========================================================================
   // 5. INTERACTIVE BUTTONS: THỔI NẾN & BẮN PHÁO HOA
   // =========================================================================
-  if (blowCandleBtn) {
-    blowCandleBtn.addEventListener('click', () => {
+  const allBlowCandleBtns = document.querySelectorAll('.action-blow-candle');
+  allBlowCandleBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
       if (isCandleBlown) return;
       isCandleBlown = true;
 
@@ -121,16 +126,21 @@ document.addEventListener('DOMContentLoaded', () => {
       // Hiển thị thông điệp ước nguyện ở thanh chữ chạy
       updateLyricDirectly("✨ Đã ước một điều ước! Nguyện mọi mong ước của Ngọc Bích đều thành hiện thực! ✨");
 
+      const isMobile = window.innerWidth <= 768;
+      const cakeY = isMobile ? window.innerHeight * 0.35 : window.innerHeight * 0.54;
+
       // Bắn tia khói lung linh
       for (let i = 0; i < 30; i++) {
         cakeEngine.sparkles.push({
           x: window.innerWidth / 2,
-          y: window.innerHeight * 0.54 - 60,
+          y: cakeY - 60,
           alpha: 1
         });
       }
 
-      blowCandleBtn.textContent = "🕯️ Nến đang ước nguyện...";
+      allBlowCandleBtns.forEach(b => {
+        b.textContent = "🕯️ Đang ước...";
+      });
 
       // Thắp sáng lại ngọn nến kỳ diệu sau 4 giây
       setTimeout(() => {
@@ -139,19 +149,22 @@ document.addEventListener('DOMContentLoaded', () => {
           cakeEngine.flameParticles.push(cakeEngine.createFlameParticle());
         }
         isCandleBlown = false;
-        blowCandleBtn.textContent = "💨 Thổi nến ước nguyện";
+        allBlowCandleBtns.forEach(b => {
+          b.textContent = b.id === 'm-blow-candle-btn' ? "💨 Thổi nến ước" : "💨 Thổi nến ước nguyện";
+        });
         cakeEngine.launchAutoFireworks();
       }, 4200);
     });
-  }
+  });
 
-  if (fireworkBtn) {
-    fireworkBtn.addEventListener('click', () => {
+  // Firework buttons (desktop + mobile)
+  document.querySelectorAll('.action-firework').forEach((btn) => {
+    btn.addEventListener('click', () => {
       for (let i = 0; i < 6; i++) {
         setTimeout(() => cakeEngine.launchAutoFireworks(), i * 180);
       }
     });
-  }
+  });
 
   // =========================================================================
   // 6. COLOR THEME SWITCHERS (HỒNG NGỌT, NGỌC BÍCH, HOÀNG KIM, TÍM VŨ TRỤ)
