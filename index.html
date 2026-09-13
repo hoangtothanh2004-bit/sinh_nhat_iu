@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Chúc Mừng Sinh Nhật Ngọc Bích 🎂 14/09 ✨</title>
+  <meta name="description" content="Trang web chúc mừng sinh nhật lung linh kỳ diệu dành riêng cho cô gái Ngọc Bích nhân ngày 14/09 với bánh kem 3D particle, âm nhạc du dương và bức thư bí mật.">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎂</text></svg>">
+</head>
+<body>
+
+  <!-- Ambient Glowing Background Aura -->
+  <div class="nebula-glow" aria-hidden="true"></div>
+
+  <!-- 3D Particle Cake Canvas -->
+  <canvas id="cakeCanvas"></canvas>
+
+  <!-- =========================================================================
+       SCENE 1: CHIBI CARTOON GIRL DELIVERING THE SECRET LETTER
+       ========================================================================= -->
+  <div id="intro-stage">
+    <div class="stardust-container" id="stardust-field"></div>
+    
+    <!-- Top Banner during Intro so the celebration is clear from the start -->
+    <div class="intro-top-banner">
+      <div class="intro-badge">✨ 14/09 • SPECIAL DAY ✨</div>
+      <h2 class="intro-birthday-text">Chúc Mừng Sinh Nhật <span>Ngọc Bích</span></h2>
+    </div>
+
+    <div class="chibi-wrapper chibi-running" id="chibi-character">
+      <!-- Speech Bubble -->
+      <div class="chibi-speech-bubble" id="speech-bubble">
+        <p class="chibi-speech-text">
+          Xin chào! Tớ mang một lá thư bí mật đặc biệt gửi tặng bạn <strong>Ngọc Bích</strong> nhân ngày <strong>14/09</strong> nè! ✨💌
+        </p>
+      </div>
+
+      <!-- Chibi Avatar with glowing aura -->
+      <div class="chibi-avatar-frame" id="chibi-avatar" title="Chạm để mở thư">
+        <div class="chibi-glow-halo"></div>
+        <img src="assets/chibi_girl_transparent.png" alt="Cô bé hoạt hình mang thư chúc mừng Ngọc Bích" class="chibi-img" id="chibi-img">
+      </div>
+
+      <!-- Interactive Call-To-Action Buttons -->
+      <div class="chibi-actions-group">
+        <button id="open-letter-cta" class="open-envelope-cta" aria-label="Mở lá thư chúc mừng Ngọc Bích">
+          <span>💌</span> Mở lá thư chúc mừng Ngọc Bích ✨
+        </button>
+        <button id="skip-to-cake-btn" class="skip-cake-link" aria-label="Xem bánh sinh nhật 3D ngay">
+          🎂 Hoặc xem Bánh Sinh Nhật 3D ngay ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       SCENE 2: INTERACTIVE LETTER MODAL (THIỆP CHÚC MỪNG 14/09)
+       ========================================================================= -->
+  <div class="modal-overlay" id="letter-modal" role="dialog" aria-modal="true" aria-labelledby="letter-title">
+    <div class="envelope-card-container">
+      <button class="modal-close-btn" id="close-letter-btn" aria-label="Đóng thư">&times;</button>
+      
+      <div class="letter-badge-row">
+        <span class="letter-tag">✉️ Thư gửi từ trái tim</span>
+        <span class="letter-date">📅 14 Tháng 09</span>
+      </div>
+
+      <h2 class="letter-title" id="letter-title">Gửi Cô Gái Mùa Thu: Ngọc Bích ✨</h2>
+
+      <div class="letter-content">
+        <p>Gửi <strong>Ngọc Bích</strong>,</p>
+        <p>
+          Hôm nay là một ngày vô cùng đặc biệt – ngày <strong>14/09</strong>, ngày mà thế giới này dịu dàng chào đón một cô gái mang tên một loài ngọc quý thanh khiết, rạng ngời và trong trẻo.
+        </p>
+        <p>
+          Bước sang tuổi mới, chúc Ngọc Bích luôn giữ được nụ cười tỏa nắng rạng rỡ trên môi, mỗi ngày trôi qua đều ngập tràn niềm vui, bình yên và may mắn. Mong rằng mọi ước mơ bạn ấp ủ đều sẽ nở hoa, và con đường phía trước sẽ luôn trải đầy hoa thơm và những điều ngọt ngào nhất.
+        </p>
+        <p>
+          Bạn hãy luôn là chính mình – một cô gái tự tin, xinh đẹp và tỏa sáng lung linh như muôn ngàn vì sao giữa bầu trời đêm nhé!
+        </p>
+      </div>
+
+      <div class="letter-signature">
+        Happy Birthday Ngọc Bích 💖
+      </div>
+
+      <button id="make-wish-btn" class="magical-action-btn" aria-label="Thắp nến và mở bánh sinh nhật 3D">
+        🎂 Thắp Nến Ước Nguyện & Đón Điều Kỳ Diệu ✨
+      </button>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       SCENE 3: MAIN PARTY HUD & 3D PARTICLE CAKE CONTROLS
+       ========================================================================= -->
+  <div id="cake-ui-layer">
+    <!-- Top HUD Navigation -->
+    <header class="top-hud">
+      <div class="top-brand-badge">
+        <span>✨ 14/09</span> • <span>NGỌC BÍCH ✨</span>
+      </div>
+
+      <div class="top-controls">
+        <div class="hud-pill-group">
+          <button class="hud-btn active" data-theme="rose" title="Tông màu Hồng Ngọt (chuẩn video mẫu)">
+            <span class="color-dot" style="background:#ff75a0;"></span> Hồng Ngọt
+          </button>
+          <button class="hud-btn" data-theme="emerald" title="Tông màu Xanh Ngọc Bích">
+            <span class="color-dot" style="background:#2ec4b6;"></span> Ngọc Bích
+          </button>
+          <button class="hud-btn" data-theme="gold" title="Tông màu Hoàng Kim">
+            <span class="color-dot" style="background:#ffd166;"></span> Hoàng Kim
+          </button>
+          <button class="hud-btn" data-theme="galaxy" title="Tông màu Tím Huyền Ảo">
+            <span class="color-dot" style="background:#a370f7;"></span> Tím Vũ Trụ
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Grand Center Hero Title directly above Cake (Giống 100% video mẫu) -->
+    <div class="cake-center-hero">
+      <div class="hero-sparkle-pill">✨ CHÚC MỪNG SINH NHẬT ✨</div>
+      <h1 class="hero-main-title">Happy Birthday</h1>
+      <h2 class="hero-name-title">Ngọc Bích</h2>
+      <div class="hero-wishes-subtitle">
+        <span class="sparkle-star">✦</span> BEST WISHES FOR YOU • 14/09 <span class="sparkle-star">✦</span>
+      </div>
+    </div>
+
+    <!-- 3D Rotation Guide Hint -->
+    <div class="drag-hint-pill">
+      <span>👆 KÉO CHUỘT / VUỐT ĐỂ XOAY 360°</span> • <span>💥 CHẠM ĐỂ BẮN PHÁO HOA</span>
+    </div>
+
+    <!-- Center-Bottom Floating Action Controls -->
+    <div class="cake-action-bar">
+      <button class="action-card-btn primary" id="open-gift-btn">
+        🎁 Mở hộp quà bất ngờ
+      </button>
+      <button class="action-card-btn" id="blow-candle-btn">
+        💨 Thổi nến ước nguyện
+      </button>
+      <button class="action-card-btn" id="reopen-letter-btn">
+        💌 Đọc lại bức thư
+      </button>
+      <button class="action-card-btn" id="firework-btn">
+        ✨ Pháo hoa chúc mừng
+      </button>
+    </div>
+
+    <!-- Handwritten Floating Lyrics Subtitle (như video mẫu) -->
+    <footer class="bottom-lyrics-bar">
+      <div class="lyrics-subtitle-box">
+        <div class="lyric-text" id="lyric-text">" baby ơi hôm nay em xinh lung linh như muôn ngàn vì sao "</div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- =========================================================================
+       SCENE 4: POLAROID GIFT MODAL ("🎁 MỞ QUÀ")
+       ========================================================================= -->
+  <div class="modal-overlay" id="gift-modal" role="dialog" aria-modal="true" aria-labelledby="gift-title">
+    <div class="gift-card-polaroid">
+      <button class="modal-close-btn" id="close-gift-btn" aria-label="Đóng quà">&times;</button>
+      
+      <div class="polaroid-photo-frame">
+        <img src="assets/gift_photo.jpg" alt="Bánh sinh nhật và nến lung linh chúc mừng Ngọc Bích" class="polaroid-img">
+      </div>
+
+      <div class="polaroid-caption">
+        <h3 id="gift-title">Happy Birthday Ngọc Bích!</h3>
+        <p>
+          Đây không chỉ đơn thuần là một màn trình diễn ánh sáng kỹ thuật số. Đây là tất cả những tình cảm chân thành nhất dành tặng riêng cho bạn nhân ngày sinh nhật 14/09.
+        </p>
+        <span class="polaroid-sparkles-tag">✨ MÃI MÃI XINH ĐẸP & HẠNH PHÚC NHÉ ✨</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Audio Floating Control Player -->
+  <div class="audio-floating-control" id="audio-toggle-btn" title="Bật/Tắt nhạc sinh nhật">
+    <div class="music-waves">
+      <div class="music-bar"></div>
+      <div class="music-bar"></div>
+      <div class="music-bar"></div>
+      <div class="music-bar"></div>
+    </div>
+    <span id="audio-btn-label">Nhạc: Đang phát</span>
+  </div>
+
+  <!-- Mini Chibi Companion in Left Bottom Corner -->
+  <div class="corner-chibi-badge" id="corner-chibi" title="Nhấn vào để đọc lại thư bí mật!">
+    <img src="assets/chibi_girl_transparent.png" alt="Chibi Ngọc Bích" class="corner-chibi-thumb">
+    <span class="corner-chibi-txt">Ngọc Bích 14/09 ✨</span>
+  </div>
+
+  <!-- Background Music Audio / Video source -->
+  <video id="bgAudio" src="assets/bg_music.mp4" loop playsinline preload="auto" style="display:none;"></video>
+
+  <!-- Scripts -->
+  <script src="cake3d.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
