@@ -65,6 +65,7 @@ class Cake3D {
 
     this.currentThemeKey = 'rose'; // Default to Rose Pink theme as in sample video!
     this.theme = this.themes[this.currentThemeKey];
+    this.showCake = false; // Initially false so cake doesn't clash with intro chibi!
 
     this.initEvents();
     this.buildCakeModel();
@@ -468,98 +469,100 @@ class Cake3D {
     const centerX = this.width / 2;
     const centerY = this.height * 0.62;
 
-    // 2. Project Cake Particles & Sort by Depth Z
-    const projected = [];
-    const scaleFactor = this.scale;
+    // 2. Project Cake Particles & Sort by Depth Z (Only if showCake is active)
+    if (this.showCake) {
+      const projected = [];
+      const scaleFactor = this.scale;
 
-    // Helper for 3D rotation & projection
-    const project = (x, y, z) => {
-      // Rotate around Y axis
-      const x1 = x * cosY - z * sinY;
-      const z1 = z * cosY + x * sinY;
+      // Helper for 3D rotation & projection
+      const project = (x, y, z) => {
+        // Rotate around Y axis
+        const x1 = x * cosY - z * sinY;
+        const z1 = z * cosY + x * sinY;
 
-      // Rotate around X axis
-      const y2 = y * cosX - z1 * sinX;
-      const z2 = z1 * cosX + y * sinX;
+        // Rotate around X axis
+        const y2 = y * cosX - z1 * sinX;
+        const z2 = z1 * cosX + y * sinX;
 
-      // Perspective projection
-      const distance = this.fov + z2;
-      if (distance <= 10) return null;
-      const pScale = (this.fov / distance) * scaleFactor;
-      const projX = centerX + x1 * pScale;
-      const projY = centerY + y2 * pScale;
+        // Perspective projection
+        const distance = this.fov + z2;
+        if (distance <= 10) return null;
+        const pScale = (this.fov / distance) * scaleFactor;
+        const projX = centerX + x1 * pScale;
+        const projY = centerY + y2 * pScale;
 
-      return { x: projX, y: projY, z: z2, pScale: pScale };
-    };
+        return { x: projX, y: projY, z: z2, pScale: pScale };
+      };
 
-    // Cake solid particles
-    const time = performance.now() * 0.003;
-    for (let p of this.particles) {
-      const pr = project(p.x0, p.y0, p.z0);
-      if (!pr) continue;
-      const pulseSize = p.baseSize + Math.sin(time + p.pulse) * 0.5;
-      projected.push({
-        x: pr.x,
-        y: pr.y,
-        z: pr.z,
-        radius: Math.max(0.8, pulseSize * pr.pScale),
-        color: p.color,
-        alpha: Math.min(1, 0.4 + (pr.z + 300) / 500)
-      });
-    }
-
-    // Ambient Swirl Particles
-    for (let s of this.ambientSwirl) {
-      const sx = Math.cos(s.angle) * s.radius;
-      const sz = Math.sin(s.angle) * s.radius;
-      const pr = project(sx, s.y, sz);
-      if (!pr) continue;
-      projected.push({
-        x: pr.x,
-        y: pr.y,
-        z: pr.z,
-        radius: Math.max(0.6, s.size * pr.pScale),
-        color: s.color,
-        alpha: Math.min(1, s.alpha * pr.pScale * 1.2)
-      });
-    }
-
-    // Flame Particles
-    for (let fp of this.flameParticles) {
-      const pr = project(fp.x, fp.y, fp.z);
-      if (!pr) continue;
-      projected.push({
-        x: pr.x,
-        y: pr.y,
-        z: pr.z,
-        radius: Math.max(1.2, fp.size * pr.pScale),
-        color: fp.color,
-        alpha: Math.min(1, (fp.life / fp.maxLife) * 1.2),
-        isFlame: true
-      });
-    }
-
-    // Sort back-to-front
-    projected.sort((a, b) => a.z - b.z);
-
-    // Render 3D Projected Particles
-    ctx.save();
-    for (let p of projected) {
-      ctx.globalAlpha = p.alpha;
-      ctx.fillStyle = p.color;
-
-      if (p.isFlame) {
-        ctx.shadowColor = p.color;
-        ctx.shadowBlur = 12;
-      } else {
-        ctx.shadowBlur = 0;
+      // Cake solid particles
+      const time = performance.now() * 0.003;
+      for (let p of this.particles) {
+        const pr = project(p.x0, p.y0, p.z0);
+        if (!pr) continue;
+        const pulseSize = p.baseSize + Math.sin(time + p.pulse) * 0.5;
+        projected.push({
+          x: pr.x,
+          y: pr.y,
+          z: pr.z,
+          radius: Math.max(0.8, pulseSize * pr.pScale),
+          color: p.color,
+          alpha: Math.min(1, 0.4 + (pr.z + 300) / 500)
+        });
       }
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-      ctx.fill();
+      // Ambient Swirl Particles
+      for (let s of this.ambientSwirl) {
+        const sx = Math.cos(s.angle) * s.radius;
+        const sz = Math.sin(s.angle) * s.radius;
+        const pr = project(sx, s.y, sz);
+        if (!pr) continue;
+        projected.push({
+          x: pr.x,
+          y: pr.y,
+          z: pr.z,
+          radius: Math.max(0.6, s.size * pr.pScale),
+          color: s.color,
+          alpha: Math.min(1, s.alpha * pr.pScale * 1.2)
+        });
+      }
+
+      // Flame Particles
+      for (let fp of this.flameParticles) {
+        const pr = project(fp.x, fp.y, fp.z);
+        if (!pr) continue;
+        projected.push({
+          x: pr.x,
+          y: pr.y,
+          z: pr.z,
+          radius: Math.max(1.2, fp.size * pr.pScale),
+          color: fp.color,
+          alpha: Math.min(1, (fp.life / fp.maxLife) * 1.2),
+          isFlame: true
+        });
+      }
+
+      // Sort back-to-front
+      projected.sort((a, b) => a.z - b.z);
+
+      // Render 3D Projected Particles
+      ctx.save();
+      for (let p of projected) {
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+
+        if (p.isFlame) {
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 12;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
     }
-    ctx.restore();
 
     // 3. Render Fireworks Over Canvas
     ctx.save();
@@ -579,6 +582,13 @@ class Cake3D {
     this.update();
     this.render();
     requestAnimationFrame(() => this.animate());
+  }
+
+  revealCake() {
+    this.showCake = true;
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => this.launchAutoFireworks(), i * 220);
+    }
   }
 
   start() {

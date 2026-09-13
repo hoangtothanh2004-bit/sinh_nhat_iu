@@ -133,15 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
         cornerChibi.classList.add('show');
       }, 800);
 
-      // Reveal Main 3D Cake HUD with the grand title
+      // Reveal Main 3D Cake HUD & Side Wings
       cakeUiLayer.classList.add('active');
 
-      // Fireworks fanfare!
-      for (let i = 0; i < 8; i++) {
-        setTimeout(() => {
-          cakeEngine.launchAutoFireworks();
-        }, i * 260);
-      }
+      // Reveal 3D Cake & Fireworks Fanfare
+      cakeEngine.revealCake();
 
       // Start Lyric Rotation
       startLyrics();
