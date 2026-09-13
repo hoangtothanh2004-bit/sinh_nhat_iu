@@ -406,13 +406,15 @@ body, html {
   justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.45s ease, visibility 0.45s ease;
+  pointer-events: none;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
   padding: 20px;
 }
 
 .modal-overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 /* 3D Envelope Container */

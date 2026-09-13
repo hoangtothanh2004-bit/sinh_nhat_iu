@@ -90,18 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', openGift);
   });
 
-  if (closeGiftBtn) {
-    closeGiftBtn.addEventListener('click', closeGift);
-  }
+  document.querySelectorAll('#close-gift-btn, #close-gift-bottom-btn, .action-close-gift').forEach((btn) => {
+    btn.addEventListener('click', closeGift);
+  });
 
-  // Modern Light-Dismiss: click backdrop or press ESC
+  // Modern Light-Dismiss: click or touch backdrop to dismiss
   [letterModal, giftModal].forEach((modal) => {
     if (!modal) return;
-    modal.addEventListener('click', (e) => {
+    const dismiss = (e) => {
       if (e.target === modal) {
         modal.classList.remove('active');
       }
-    });
+    };
+    modal.addEventListener('click', dismiss);
+    modal.addEventListener('touchend', dismiss);
   });
 
   window.addEventListener('keydown', (e) => {
